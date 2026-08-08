@@ -277,9 +277,6 @@ jobs:
             echo "Production deployment"
             echo "Image: $NEW_IMAGE"
 
-            echo "Simulating a production deployment..."
-            sleep 60
-
             echo "$GHCR_TOKEN" | docker login ghcr.io \
               -u "$GHCR_USERNAME" \
               --password-stdin

@@ -23,7 +23,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-console.log("Deployment version A");
+console.log("Deployment version A - awaiting approval");
 console.log("Deployment version B");
 
 app.listen(PORT, () => {
