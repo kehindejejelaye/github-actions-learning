@@ -152,7 +152,7 @@ jobs:
           IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
 
   deploy-staging:
-    needs: deploy-development
+    needs: [build, deploy-development]
     runs-on: ubuntu-latest
     environment: staging
 
