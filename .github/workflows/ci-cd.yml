@@ -85,6 +85,7 @@ jobs:
 
             docker run -d \
               --name github-actions-learning \
+              -p 3000:3000 \
               ghcr.io/kehindejejelaye/github-actions-learning:$IMAGE_TAG
 
             echo "Deployment completed"
