@@ -23,6 +23,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+console.log("Deployment version A");
+
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
