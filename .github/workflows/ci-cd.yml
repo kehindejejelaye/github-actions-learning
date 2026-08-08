@@ -53,7 +53,7 @@ jobs:
           docker push \
             ghcr.io/${{ github.repository }}:${{ github.sha }}
 
-  deploy:
+  deploy-development:
     needs: build
     runs-on: ubuntu-latest
     environment: development
@@ -147,6 +147,98 @@ jobs:
 
             exit 1
         env: 
+          GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
+          GHCR_TOKEN: ${{ vars.GHCR_TOKEN }}
+          IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
+
+  deploy-staging:
+    needs: deploy-development
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Deploy to Staging
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ vars.SERVER_HOST }}
+          username: ${{ vars.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: GHCR_USERNAME,GHCR_TOKEN,IMAGE_TAG
+          script: |
+            NEW_IMAGE="ghcr.io/kehindejejelaye/github-actions-learning:$IMAGE_TAG"
+
+            echo "Deploying $NEW_IMAGE"
+
+            echo "$GHCR_TOKEN" | docker login ghcr.io \
+              -u "$GHCR_USERNAME" \
+              --password-stdin
+
+            docker pull "$NEW_IMAGE"
+
+            OLD_IMAGE=$(docker inspect \
+              --format='{{.Config.Image}}' \
+              github-actions-learning 2>/dev/null || true)
+
+            if [ -n "$OLD_IMAGE" ]; then
+              echo "Previous image: $OLD_IMAGE"
+            else
+              echo "No previous deployment found"
+            fi
+
+            docker rm -f github-actions-learning 2>/dev/null || true
+
+            docker run -d \
+              --name github-actions-learning \
+              -p 3000:3000 \
+              "$NEW_IMAGE"
+
+            echo "Waiting for application to start..."
+            sleep 3
+
+            echo "Running health check..."
+
+            if curl --fail --silent http://localhost:3000/health; then
+              echo ""
+              echo "Health check passed"
+              echo "Staging deployment completed successfully"
+              docker ps -a
+              exit 0
+            fi
+
+            echo ""
+            echo "Health check FAILED"
+
+            if [ -z "$OLD_IMAGE" ]; then
+              echo "No previous image available for rollback"
+              docker logs github-actions-learning
+              exit 1
+            fi
+
+            echo "Rolling back to: $OLD_IMAGE"
+
+            docker rm -f github-actions-learning 2>/dev/null || true
+
+            docker run -d \
+              --name github-actions-learning \
+              -p 3000:3000 \
+              "$OLD_IMAGE"
+
+            sleep 3
+
+            echo "Verifying rollback..."
+
+            if curl --fail --silent http://localhost:3000/health; then
+              echo ""
+              echo "Rollback successful"
+            else
+              echo ""
+              echo "CRITICAL: Rollback also failed"
+              docker logs github-actions-learning
+            fi
+
+            exit 1
+
+        env:
           GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
           GHCR_TOKEN: ${{ vars.GHCR_TOKEN }}
           IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
