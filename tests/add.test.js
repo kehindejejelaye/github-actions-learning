@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 
 function add(a, b) {
-  return a + b;
+  return a - b;
 }
 
 test('adds two numbers', () => {
