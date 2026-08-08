@@ -169,7 +169,7 @@ jobs:
               echo "ERROR: IMAGE_TAG is empty"
               exit 1
             fi
-            
+
             NEW_IMAGE="ghcr.io/kehindejejelaye/github-actions-learning:$IMAGE_TAG"
 
             echo "Deploying $NEW_IMAGE"
@@ -251,6 +251,11 @@ jobs:
   deploy-production:
     needs: [build, deploy-development, deploy-staging]
     runs-on: ubuntu-latest
+
+    concurrency:
+      group: production
+      cancel-in-progress: false
+
     environment: production
 
     steps:
