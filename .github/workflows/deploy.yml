@@ -15,8 +15,27 @@ jobs:
           host: ${{ vars.SERVER_HOST }}
           username: ${{ vars.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: GHCR_USERNAME,GHCR_TOKEN
           script: |
-            echo "Connected to server"
-            hostname
-            docker --version
-            
+            echo "Starting deployment..."
+
+            echo "$GHCR_TOKEN" | docker login ghcr.io \
+              -u "$GHCR_USERNAME" \
+              --password-stdin
+
+            docker pull ghcr.io/kehindejejelaye/github-actions-learning:a12755876091ac09fbe4c1244711780c89009917
+
+            echo "Image pulled successfully"
+
+            docker rm -f github-actions-learning 2>/dev/null || true
+
+            docker run -d \
+              --name github-actions-learning \
+              ghcr.io/kehindejejelaye/github-actions-learning:a12755876091ac09fbe4c1244711780c89009917
+
+            echo "Deployment completed"
+
+            docker ps -a
+          env: 
+            GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
+            GHCR_TOKEN: ${{ vars.GHCR_TOKEN }}
