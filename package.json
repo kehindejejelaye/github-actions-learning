@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "test": "node --test",
-    "build": "mkdir -p dist && cp index.js dist/index.js"
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
   }
 }
