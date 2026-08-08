@@ -24,7 +24,7 @@ app.get('/health', (req, res) => {
 });
 
 console.log("Deployment version A - awaiting approval");
-console.log("Deployment version B");
+console.log("Deployment version B - newer release");
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
