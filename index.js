@@ -20,7 +20,7 @@ app.get('/multiply', (req, res) => {
 });
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.status(500).json({ status: 'failed' });
 });
 
 app.listen(PORT, () => {
