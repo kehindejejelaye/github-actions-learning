@@ -36,6 +36,6 @@ jobs:
             echo "Deployment completed"
 
             docker ps -a
-          env: 
-            GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
-            GHCR_TOKEN: ${{ vars.GHCR_TOKEN }}
+        env: 
+          GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
+          GHCR_TOKEN: ${{ vars.GHCR_TOKEN }}
