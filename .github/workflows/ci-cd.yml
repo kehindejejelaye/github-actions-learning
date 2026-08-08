@@ -71,13 +71,14 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: GHCR_USERNAME,GHCR_TOKEN,IMAGE_TAG
           script: |
+            NEW_IMAGE="ghcr.io/kehindejejelaye/github-actions-learning:$IMAGE_TAG"
             echo "Starting deployment..."
 
             echo "$GHCR_TOKEN" | docker login ghcr.io \
               -u "$GHCR_USERNAME" \
               --password-stdin
 
-            docker pull ghcr.io/kehindejejelaye/github-actions-learning:$IMAGE_TAG
+            docker pull "$NEW_IMAGE"
 
             echo "Image pulled successfully"
 
@@ -86,7 +87,16 @@ jobs:
             docker run -d \
               --name github-actions-learning \
               -p 3000:3000 \
-              ghcr.io/kehindejejelaye/github-actions-learning:$IMAGE_TAG
+              "$NEW_IMAGE"
+
+            sleep 3
+
+            if curl --fail --silent http://localhost:3000/health; then
+              echo "Health check passed"
+            else
+              echo "Health check failed"
+              exit 1
+            fi
 
             echo "Deployment completed"
 
